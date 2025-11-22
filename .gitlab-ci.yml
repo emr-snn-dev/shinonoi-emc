@@ -1,0 +1,29 @@
+# GitLab Pagesのための修正版設定ファイル
+pages:
+  stage: deploy
+  script:
+    # サイトのベースURLを設定 (リポジトリ名を使用)
+    - export BASE_URL="/shinonoi-emc-tech-club/"
+    
+    # publicディレクトリを作成
+    - mkdir public
+    
+    # ファイルを一時ディレクトリにコピー
+    - cp -r . public/
+    
+    # HTMLファイル内の相対パスを修正
+    # 既存の <link href="style.css"> や <script src="script.js"> を /shinonoi-emc-tech-club/style.css に置換
+    - find public -type f -name "*.html" -exec sed -i "s|href=\"|href=\"$BASE_URL|g" {} \;
+    - find public -type f -name "*.html" -exec sed -i "s|src=\"|src=\"$BASE_URL|g" {} \;
+    
+    # index.htmlのリンクは特別に修正を元に戻す
+    - sed -i "s|href=\"${BASE_URL}index.html\"|href=\"${BASE_URL}\"|g" public/*.html
+    
+    # 不要なファイルを削除
+    - rm public/.gitlab-ci.yml
+    
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
